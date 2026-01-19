@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface EmbeddedDashboardProps {
@@ -13,6 +13,9 @@ export default function EmbeddedDashboard({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Suppress unused variable warning
+  void setError;
 
   useEffect(() => {
     // Simuler le chargement du dashboard

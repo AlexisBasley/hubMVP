@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   BarChart3,
-  AlertTriangle,
   ChevronRight,
   X,
   Wrench,
@@ -9,7 +8,7 @@ import {
   Zap,
 } from 'lucide-react';
 
-type ModuleType = 'dashboard' | 'intervenants' | 'documents' | 'timeTracking' | 'onboarding' | 'ltci' | 'tools' | 'courses' | 'smartSolutions';
+type ModuleType = 'dashboard' | 'tools' | 'courses' | 'smartSolutions';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -54,12 +53,6 @@ const menuItems: MenuItem[] = [
     label: 'Mes Parcours',
     roles: ['operationnel', 'director', 'admin'],
     disabled: true,
-  },
-  {
-    id: 'ltci',
-    icon: <AlertTriangle size={20} />,
-    label: 'LTCI',
-    roles: ['director', 'admin'],
   },
 ];
 

@@ -2,12 +2,10 @@ import React from 'react';
 import { Menu, Bell, Settings, LogOut, ChevronDown, Building2 } from 'lucide-react';
 
 interface HeaderProps {
-  sidebarOpen: boolean;
   onToggleSidebar: () => void;
   selectedSite: string;
   onSiteChange: (site: string) => void;
   onNotificationToggle: () => void;
-  notificationOpen: boolean;
 }
 
 const sites = [
@@ -18,12 +16,10 @@ const sites = [
 ];
 
 export default function Header({
-  sidebarOpen,
   onToggleSidebar,
   selectedSite,
   onSiteChange,
   onNotificationToggle,
-  notificationOpen,
 }: HeaderProps) {
   const [sitesOpen, setSitesOpen] = React.useState(false);
 

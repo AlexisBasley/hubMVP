@@ -1,17 +1,8 @@
 import React, { useState } from 'react';
 import {
-  Users,
-  AlertTriangle,
-  Clock,
-  FileCheck,
-  TrendingUp,
-  Calendar,
-  CheckCircle,
-  AlertCircle,
   Plus,
   GripVertical,
   X,
-  Settings,
 } from 'lucide-react';
 import DashboardGallery from './DashboardGallery';
 import EmbeddedDashboard from './EmbeddedDashboard';
@@ -206,7 +197,7 @@ export default function Dashboard({ userRole, selectedSite }: DashboardProps) {
       <div className="space-y-6">
         {activeDashboards
           .sort((a, b) => a.order - b.order)
-          .map((dashboard, index) => (
+          .map((dashboard) => (
             <div
               key={dashboard.id}
               className={`${
