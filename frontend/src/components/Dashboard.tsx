@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Plus,
   GripVertical,
@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import DashboardGallery from './DashboardGallery';
 import EmbeddedDashboard from './EmbeddedDashboard';
+import { useUserPreferences } from '../hooks/useUserPreferences';
 
 interface DashboardItem {
   id: string;
@@ -68,8 +69,8 @@ const AVAILABLE_DASHBOARDS = [
 ];
 
 export default function Dashboard({ userRole, selectedSite }: DashboardProps) {
-  const isDirector = userRole === 'director';
-  const [activeDashboards, setActiveDashboards] = useState<DashboardItem[]>([
+  // Default dashboards to use if no preferences are saved
+  const DEFAULT_DASHBOARDS: DashboardItem[] = [
     {
       id: '1',
       powerBiId: 'pb-kpi-001',
@@ -97,10 +98,40 @@ export default function Dashboard({ userRole, selectedSite }: DashboardProps) {
       width: 'half',
       order: 3,
     },
-  ]);
+  ];
+
+  const isDirector = userRole === 'director';
+  const { preferences, loading: prefsLoading, saveDashboards } = useUserPreferences();
+  const [activeDashboards, setActiveDashboards] = useState<DashboardItem[]>([]);
 
   const [showGallery, setShowGallery] = useState(false);
   const [draggedItem, setDraggedItem] = useState<DashboardItem | null>(null);
+
+  // Load dashboards from preferences on mount
+  useEffect(() => {
+    if (!prefsLoading && preferences.dashboards && Array.isArray(preferences.dashboards)) {
+      setActiveDashboards(preferences.dashboards);
+    } else if (!prefsLoading && (!preferences.dashboards || preferences.dashboards.length === 0)) {
+      // Set default dashboards if none saved
+      setActiveDashboards(DEFAULT_DASHBOARDS);
+    }
+  }, [preferences.dashboards, prefsLoading]);
+
+  // Auto-save dashboards whenever they change (debounced)
+  useEffect(() => {
+    // Don't save on initial load
+    if (prefsLoading) return;
+    
+    const timer = setTimeout(() => {
+      if (activeDashboards.length > 0 || preferences.dashboards) {
+        saveDashboards(activeDashboards).catch(err => {
+          console.error('Failed to save dashboards:', err);
+        });
+      }
+    }, 1000); // Debounce 1 second
+
+    return () => clearTimeout(timer);
+  }, [activeDashboards, saveDashboards, preferences.dashboards, prefsLoading]);
 
   const handleAddDashboard = (powerBiId: string) => {
     const dashboard = AVAILABLE_DASHBOARDS.find(d => d.powerBiId === powerBiId);

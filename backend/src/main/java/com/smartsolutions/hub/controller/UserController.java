@@ -2,9 +2,11 @@ package com.smartsolutions.hub.controller;
 
 import com.smartsolutions.hub.dto.SiteDTO;
 import com.smartsolutions.hub.dto.UserDTO;
+import com.smartsolutions.hub.dto.UserPreferencesDTO;
 import com.smartsolutions.hub.model.User;
 import com.smartsolutions.hub.security.UserPrincipal;
 import com.smartsolutions.hub.service.UserService;
+import com.smartsolutions.hub.service.UserPreferencesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +22,7 @@ import java.util.Map;
 public class UserController {
     
     private final UserService userService;
+    private final UserPreferencesService userPreferencesService;
     
     @GetMapping("/me")
     public UserDTO getCurrentUser(@AuthenticationPrincipal UserPrincipal principal) {
@@ -64,5 +67,36 @@ public class UserController {
         );
         User updated = userService.updatePreferences(user.getId(), preferences);
         return userService.toDTO(updated);
+    }
+    
+    /**
+     * Get user preferences (tools, dashboards, settings)
+     */
+    @GetMapping("/me/preferences/v2")
+    public UserPreferencesDTO getUserPreferencesV2(@AuthenticationPrincipal UserPrincipal principal) {
+        log.debug("getUserPreferencesV2 called for user: {}", principal.id());
+        return userPreferencesService.getUserPreferences(principal.id());
+    }
+    
+    /**
+     * Update user preferences (full replace)
+     */
+    @PutMapping("/me/preferences/v2")
+    public UserPreferencesDTO updateUserPreferencesV2(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestBody Map<String, Object> preferences) {
+        log.debug("updateUserPreferencesV2 called for user: {}", principal.id());
+        return userPreferencesService.updateUserPreferences(principal.id(), preferences);
+    }
+    
+    /**
+     * Merge user preferences (partial update)
+     */
+    @PatchMapping("/me/preferences/v2")
+    public UserPreferencesDTO mergeUserPreferencesV2(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestBody Map<String, Object> partialPreferences) {
+        log.debug("mergeUserPreferencesV2 called for user: {}", principal.id());
+        return userPreferencesService.mergeUserPreferences(principal.id(), partialPreferences);
     }
 }

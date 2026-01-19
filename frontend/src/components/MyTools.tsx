@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useUserPreferences } from '../hooks/useUserPreferences';
 import {
   Plus,
   X,
@@ -272,7 +273,8 @@ const getIconForCategory = (category: string): React.ReactNode => {
 };
 
 export default function MyTools() {
-  const [activeTools, setActiveTools] = useState<Tool[]>([
+  // Default tools to use if no preferences are saved
+  const DEFAULT_TOOLS: Tool[] = [
     {
       id: 'dalux',
       name: 'Dalux',
@@ -383,7 +385,10 @@ export default function MyTools() {
       isActive: true,
       order: 11,
     },
-  ]);
+  ];
+
+  const { preferences, loading: prefsLoading, saveTools } = useUserPreferences();
+  const [activeTools, setActiveTools] = useState<Tool[]>([]);
 
   const [showModal, setShowModal] = useState(false);
   const [showCustomToolForm, setShowCustomToolForm] = useState(false);
@@ -398,6 +403,41 @@ export default function MyTools() {
     url: '',
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Load tools from preferences on mount
+  useEffect(() => {
+    if (!prefsLoading && preferences.tools && Array.isArray(preferences.tools)) {
+      // Reconstruct icons for tools loaded from preferences
+      const toolsWithIcons = preferences.tools.map((tool: any) => ({
+        ...tool,
+        icon: tool.id.startsWith('custom-') 
+          ? getIconForCategory(tool.category)
+          : AVAILABLE_TOOLS.find(t => t.id === tool.id)?.icon || getIconForCategory(tool.category)
+      }));
+      setActiveTools(toolsWithIcons);
+    } else if (!prefsLoading && (!preferences.tools || preferences.tools.length === 0)) {
+      // Set default tools if none saved
+      setActiveTools(DEFAULT_TOOLS);
+    }
+  }, [preferences.tools, prefsLoading]);
+
+  // Auto-save tools whenever they change (debounced)
+  useEffect(() => {
+    // Don't save on initial load
+    if (prefsLoading) return;
+    
+    const timer = setTimeout(() => {
+      if (activeTools.length > 0 || preferences.tools) {
+        // Remove icons before saving (they can't be serialized)
+        const toolsToSave = activeTools.map(({ icon, ...rest }) => rest);
+        saveTools(toolsToSave).catch(err => {
+          console.error('Failed to save tools:', err);
+        });
+      }
+    }, 1000); // Debounce 1 second
+
+    return () => clearTimeout(timer);
+  }, [activeTools, saveTools, preferences.tools, prefsLoading]);
 
   const filteredAvailableTools = AVAILABLE_TOOLS.filter(tool => {
     const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
