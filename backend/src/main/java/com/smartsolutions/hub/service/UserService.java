@@ -2,9 +2,12 @@ package com.smartsolutions.hub.service;
 
 import com.smartsolutions.hub.dto.SiteDTO;
 import com.smartsolutions.hub.dto.UserDTO;
+import com.smartsolutions.hub.model.Site;
 import com.smartsolutions.hub.model.User;
+import com.smartsolutions.hub.repository.SiteRepository;
 import com.smartsolutions.hub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,21 +16,18 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
     
     private final UserRepository userRepository;
-    
-    // Mock sites data
-    private static final List<SiteDTO> MOCK_SITES = List.of(
-        new SiteDTO(1L, "Chantier Paris - La Défense", "Paris, France", "active"),
-        new SiteDTO(2L, "Chantier Lyon Part-Dieu", "Lyon, France", "active"),
-        new SiteDTO(3L, "Chantier Marseille Euroméditerranée", "Marseille, France", "active")
-    );
+    private final SiteRepository siteRepository;
     
     @Transactional
     public User getOrCreateUser(String email, String name, String role, List<Long> siteIds) {
+        log.debug("getOrCreateUser called with email={}, name={}, role={}, siteIds={}", email, name, role, siteIds);
         return userRepository.findByEmail(email)
             .orElseGet(() -> {
+                log.info("User not found, creating new user: {}", email);
                 User newUser = new User();
                 newUser.setEmail(email);
                 newUser.setName(name);
@@ -51,9 +51,26 @@ public class UserService {
         );
     }
     
+    /**
+     * Get user's sites from database by their site IDs
+     */
+    @Transactional(readOnly = true)
     public List<SiteDTO> getUserSites(List<Long> siteIds) {
-        return MOCK_SITES.stream()
-            .filter(site -> siteIds.contains(site.id()))
+        if (siteIds == null || siteIds.isEmpty()) {
+            return List.of();
+        }
+        
+        // Fetch sites from database
+        List<Site> sites = siteRepository.findByIdIn(siteIds);
+        
+        // Convert to DTOs
+        return sites.stream()
+            .map(site -> new SiteDTO(
+                site.getId(),
+                site.getName(),
+                site.getLocation(),
+                site.getStatus()
+            ))
             .toList();
     }
     

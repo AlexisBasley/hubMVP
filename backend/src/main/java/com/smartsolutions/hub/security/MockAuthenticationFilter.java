@@ -14,8 +14,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@Component
-@Profile("dev")
+// DISABLED: Using real JWT tokens now, not mock authentication
+// @Component
+// @Profile("dev")
 public class MockAuthenticationFilter extends OncePerRequestFilter {
     
     private static final String MOCK_USER_HEADER = "X-Mock-User";

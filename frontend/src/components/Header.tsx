@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, Bell, Settings, LogOut, ChevronDown, Building2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import siteService, { SiteDTO } from '../services/siteService';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -9,13 +10,6 @@ interface HeaderProps {
   onNotificationToggle: () => void;
 }
 
-const sites = [
-  'Chantier Paris - La Défense',
-  'Chantier Lyon - Confluence',
-  'Chantier Marseille - Vieux Port',
-  'Chantier Lille - Cité Administrative',
-];
-
 export default function Header({
   onToggleSidebar,
   selectedSite,
@@ -23,7 +17,34 @@ export default function Header({
   onNotificationToggle,
 }: HeaderProps) {
   const [sitesOpen, setSitesOpen] = React.useState(false);
+  const [userSites, setUserSites] = React.useState<SiteDTO[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const { user, logout } = useAuth();
+
+  // Fetch user's assigned sites on mount
+  React.useEffect(() => {
+    const fetchUserSites = async () => {
+      try {
+        setLoading(true);
+        const sites = await siteService.getUserSites();
+        setUserSites(sites);
+        
+        // If user has sites and no site is selected, select the first one
+        if (sites.length > 0 && !selectedSite) {
+          onSiteChange(sites[0].name);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user sites:', error);
+        setUserSites([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchUserSites();
+    }
+  }, [user]);
 
   return (
     <header className="bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between h-16 shadow-sm">
@@ -42,26 +63,32 @@ export default function Header({
           <button
             onClick={() => setSitesOpen(!sitesOpen)}
             className="flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors text-slate-900 font-medium"
+            disabled={loading || userSites.length === 0}
           >
             <Building2 size={18} className="text-orange-600" />
-            <span className="max-w-xs truncate text-sm">{selectedSite}</span>
-            <ChevronDown size={16} className={`transition-transform ${sitesOpen ? 'rotate-180' : ''}`} />
+            <span className="max-w-xs truncate text-sm">
+              {loading ? 'Chargement...' : userSites.length === 0 ? 'Aucun chantier' : selectedSite}
+            </span>
+            {userSites.length > 0 && (
+              <ChevronDown size={16} className={`transition-transform ${sitesOpen ? 'rotate-180' : ''}`} />
+            )}
           </button>
 
-          {sitesOpen && (
+          {sitesOpen && userSites.length > 0 && (
             <div className="absolute top-full mt-2 left-0 bg-white border border-neutral-200 rounded-lg shadow-lg z-50 min-w-64">
-              {sites.map(site => (
+              {userSites.map(site => (
                 <button
-                  key={site}
+                  key={site.id}
                   onClick={() => {
-                    onSiteChange(site);
+                    onSiteChange(site.name);
                     setSitesOpen(false);
                   }}
                   className={`w-full text-left px-4 py-3 hover:bg-orange-50 transition-colors border-b border-neutral-100 last:border-b-0 ${
-                    site === selectedSite ? 'bg-orange-100 text-orange-900 font-medium' : 'text-slate-700'
+                    site.name === selectedSite ? 'bg-orange-100 text-orange-900 font-medium' : 'text-slate-700'
                   }`}
                 >
-                  {site}
+                  <div className="font-medium">{site.name}</div>
+                  <div className="text-xs text-slate-500 mt-0.5">{site.location}</div>
                 </button>
               ))}
             </div>
@@ -94,7 +121,10 @@ export default function Header({
           <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold text-sm">
             {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
           </div>
-          <span className="text-sm font-medium text-slate-900 hidden sm:inline">{user?.name || 'User'}</span>
+          <div className="hidden sm:flex flex-col">
+            <span className="text-sm font-medium text-slate-900">{user?.name || 'User'}</span>
+            <span className="text-xs text-slate-500 capitalize">{user?.role || 'Utilisateur'}</span>
+          </div>
         </div>
 
         {/* Logout */}

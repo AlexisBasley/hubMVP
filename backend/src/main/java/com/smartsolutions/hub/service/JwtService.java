@@ -95,6 +95,36 @@ public class JwtService {
     }
     
     /**
+     * Extract name from token
+     */
+    public String extractName(String token) {
+        return extractClaim(token, claims -> claims.get("name", String.class));
+    }
+    
+    /**
+     * Extract role from token
+     */
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+    
+    /**
+     * Extract site IDs from token
+     */
+    @SuppressWarnings("unchecked")
+    public java.util.List<Long> extractSiteIds(String token) {
+        return extractClaim(token, claims -> {
+            Object siteIds = claims.get("siteIds");
+            if (siteIds instanceof java.util.List) {
+                return ((java.util.List<?>) siteIds).stream()
+                    .map(id -> id instanceof Integer ? ((Integer) id).longValue() : (Long) id)
+                    .toList();
+            }
+            return java.util.Collections.emptyList();
+        });
+    }
+    
+    /**
      * Extract token type (access or refresh)
      */
     public String extractTokenType(String token) {

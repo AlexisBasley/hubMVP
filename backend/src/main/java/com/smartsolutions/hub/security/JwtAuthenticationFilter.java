@@ -43,22 +43,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Extract user information from token
                 String email = jwtService.extractEmail(token);
                 Long userId = jwtService.extractUserId(token);
+                String name = jwtService.extractName(token);
+                String role = jwtService.extractRole(token);
+                java.util.List<Long> siteIds = jwtService.extractSiteIds(token);
                 
-                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    // Create authentication object
+                if (email != null) {
+                    // ALWAYS clear existing authentication to avoid session caching issues
+                    SecurityContextHolder.clearContext();
+                    
+                    // Create authentication object with all user information from token
                     UserPrincipal userPrincipal = new UserPrincipal(
                         userId,
                         email,
-                        "", // name
-                        "USER", // role will be loaded from token if needed
-                        Collections.emptyList() // siteIds
+                        name != null ? name : "",
+                        role != null ? role : "USER",
+                        siteIds != null ? siteIds : Collections.emptyList()
                     );
+                    
+                    log.debug("Creating UserPrincipal: userId={}, email={}, name={}, role={}, siteIds={}", 
+                        userId, email, name, role, siteIds);
                     
                     UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                             userPrincipal,
                             null,
-                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + (role != null ? role.toUpperCase() : "USER")))
                         );
                     
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -66,7 +75,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // Set authentication in security context
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     
-                    log.debug("JWT authentication successful for user: {}", email);
+                    log.debug("JWT authentication successful for user: {} ({})", name, email);
+                    log.debug("After setting authentication - SecurityContext: {}", 
+                        SecurityContextHolder.getContext().getAuthentication());
                 }
             }
         } catch (Exception e) {
