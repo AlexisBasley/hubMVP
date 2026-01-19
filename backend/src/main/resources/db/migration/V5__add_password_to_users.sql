@@ -25,7 +25,7 @@ VALUES (
     'jean.dupont@smartsolutions.fr',
     'Jean Dupont',
     'operationnel',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', -- "Test1234!"
+    '$2a$10$WQpI5hn6seRL9vMHDUe3OuGAy/.Biyc/IHJ9c1qx.9T1KQ1dY6KbW', -- "Test1234!"
     'fr',
     true,
     true

@@ -19,7 +19,7 @@ import java.util.Map;
  * Handles all authentication-related endpoints
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Authentication", description = "Authentication and user management endpoints")

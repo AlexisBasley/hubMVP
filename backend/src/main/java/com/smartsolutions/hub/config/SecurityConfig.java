@@ -42,9 +42,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
+                // Public endpoints (context path is already /api, so don't include it here)
                 .requestMatchers(
-                    "/api/auth/**",           // Authentication endpoints
+                    "/auth/**",               // Authentication endpoints
                     "/api-docs/**",           // Swagger docs
                     "/swagger-ui/**",         // Swagger UI
                     "/swagger-ui.html",
@@ -75,9 +75,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
+                // Public endpoints (context path is already /api, so don't include it here)
                 .requestMatchers(
-                    "/api/auth/**",
+                    "/auth/**",
                     "/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",

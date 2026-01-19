@@ -1,5 +1,6 @@
 import React from 'react';
 import { Menu, Bell, Settings, LogOut, ChevronDown, Building2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -22,6 +23,7 @@ export default function Header({
   onNotificationToggle,
 }: HeaderProps) {
   const [sitesOpen, setSitesOpen] = React.useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <header className="bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between h-16 shadow-sm">
@@ -90,15 +92,17 @@ export default function Header({
         {/* User Profile */}
         <div className="flex items-center gap-3 pl-3 border-l border-neutral-200">
           <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold text-sm">
-            JD
+            {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
           </div>
-          <span className="text-sm font-medium text-slate-900 hidden sm:inline">Jean Dupont</span>
+          <span className="text-sm font-medium text-slate-900 hidden sm:inline">{user?.name || 'User'}</span>
         </div>
 
         {/* Logout */}
         <button
+          onClick={logout}
           className="p-2 hover:bg-neutral-100 rounded-lg transition-colors text-slate-700"
           aria-label="Logout"
+          title="Se déconnecter"
         >
           <LogOut size={20} />
         </button>
