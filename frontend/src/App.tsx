@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import NotificationCenter from './components/NotificationCenter';
 import MyTools from './components/MyTools';
+import DevUserSwitcher from './components/DevUserSwitcher';
 
 type ModuleType = 'dashboard' | 'tools' | 'courses' | 'smartSolutions';
 
@@ -80,6 +81,9 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-neutral-50">
+      {/* Dev User Switcher - Only in development */}
+      {import.meta.env.DEV && <DevUserSwitcher />}
+      
       {/* Sidebar */}
       <Sidebar
         isOpen={appState.sidebarOpen}

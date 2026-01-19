@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    show-sql: false
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/${AZURE_AD_TENANT_ID}/v2.0
+          audiences: ${AZURE_AD_CLIENT_ID}
+
+# Azure AD configuration (future)
+azure:
+  activedirectory:
+    enabled: ${AZURE_AD_ENABLED:false}
+    tenant-id: ${AZURE_AD_TENANT_ID:}
+    client-id: ${AZURE_AD_CLIENT_ID:}
+    client-secret: ${AZURE_AD_CLIENT_SECRET:}
+
+# External API configuration (future)
+hub:
+  external:
+    sites-api:
+      url: ${EXTERNAL_SITE_API_URL:}
+      client-id: ${EXTERNAL_API_CLIENT_ID:}
+      client-secret: ${EXTERNAL_API_CLIENT_SECRET:}
+  
+  powerbi:
+    enabled: ${POWERBI_ENABLED:false}
+    workspace-id: ${POWERBI_WORKSPACE_ID:}
+    client-id: ${POWERBI_CLIENT_ID:}
+    client-secret: ${POWERBI_CLIENT_SECRET:}
+    tenant-id: ${POWERBI_TENANT_ID:}
+
+logging:
+  level:
+    com.smartsolutions.hub: INFO
+    org.springframework.web: WARN

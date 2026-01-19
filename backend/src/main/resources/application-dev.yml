@@ -1,0 +1,62 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/hub_db}
+    username: ${DATABASE_USER:hub_user}
+    password: ${DATABASE_PASSWORD:dev_password}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    show-sql: true
+  
+  security:
+    filter:
+      order: 1
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:dev-secret-key-change-in-production-please-make-it-long-and-secure-at-least-256-bits}
+  expiration: 86400000  # 24 hours in milliseconds
+  refresh-expiration: 604800000  # 7 days in milliseconds
+  issuer: hub-smart-solutions
+  header: Authorization
+  prefix: "Bearer "
+
+# Mock configuration
+hub:
+  security:
+    mock:
+      enabled: true
+      users:
+        - email: jean.dupont@smartsolutions.fr
+          name: Jean Dupont
+          role: operationnel
+          siteIds: [1, 2]
+        - email: sophie.martin@smartsolutions.fr
+          name: Sophie Martin
+          role: director
+          siteIds: [1, 2, 3]
+        - email: marc.bernard@smartsolutions.fr
+          name: Marc Bernard
+          role: admin
+          siteIds: [1, 2, 3]
+  sites:
+    mock:
+      enabled: true
+      sites:
+        - id: 1
+          name: Chantier Paris - La Défense
+          location: Paris, France
+          status: active
+        - id: 2
+          name: Chantier Lyon Part-Dieu
+          location: Lyon, France
+          status: active
+        - id: 3
+          name: Chantier Marseille Euroméditerranée
+          location: Marseille, France
+          status: active
+
+logging:
+  level:
+    com.smartsolutions.hub: DEBUG
+    org.springframework.web: DEBUG

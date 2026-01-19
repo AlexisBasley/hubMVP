@@ -4,6 +4,7 @@ node_modules/
 # Build output
 dist/
 build/
+target/
 
 # Environment variables
 .env
@@ -33,3 +34,23 @@ coverage/
 # Temporary files
 tmp/
 temp/
+
+# Backend (Maven/Java)
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+*.class
+*.jar
+*.war
+*.ear
+.settings/
+.project
+.classpath
+
+# Docker
+docker-compose.override.yml
+
+# Database
+*.db
+*.sqlite
